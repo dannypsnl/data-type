@@ -1,24 +1,25 @@
-#lang racket
+#lang typed/racket
 
-(module+ main
-  (require racket/cmdline)
+(provide data)
 
-  (define who (make-parameter "world"))
-  (command-line
-    #:program "data-type"
-    #:once-each
-    [("-n" "--name") name "Who to say hello to" (who name)]
-    #:args ()
-    (printf "hello ~a~n" (who))))
+(require syntax/parse/define
+         (for-syntax racket/syntax))
 
-(module+ test
-  (require rackunit)
+(begin-for-syntax
+  (define-syntax-class binding
+    #:datum-literals (:)
+    (pattern (name:id : ty)
+             #:attr pair
+             #'(name : ty))
+    (pattern ty
+             #:attr pair
+             #`(#,(generate-temporary) : ty)))
+  (define-syntax-class constructor
+    (pattern (name:id b*:binding ...)
+             #:attr bind* #'(b*.pair ...))))
 
-  (define expected 1)
-  (define actual 1)
-
-  (test-case
-    "Example Test"
-    (check-equal? actual expected))
-
-  (test-equal? "Shortcut Equal Test" actual expected))
+(define-syntax-parser data
+  [(_ name:id c*:constructor ...)
+   #'(begin
+       (struct name () #:transparent)
+       (struct c*.name name c*.bind* #:transparent) ...)])
