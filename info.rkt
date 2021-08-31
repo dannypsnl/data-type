@@ -1,6 +1,6 @@
 #lang info
 (define collection "data-type")
-(define deps '("base"))
+(define deps '("base" "typed-racket-lib"))
 (define build-deps '("scribble-lib" "racket-doc" "rackunit-lib"))
 (define scribblings '(("scribblings/data-type.scrbl" ())))
 (define pkg-desc "Description Here")
