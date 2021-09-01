@@ -6,7 +6,7 @@
 
 ### Usage
 
-```
+```racket
 (data expr
       [Var (name : Symbol)]
       [abs (name : Symbol) (body : expr)]
