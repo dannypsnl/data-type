@@ -20,8 +20,15 @@
       #:attr bind* #'(b*.pair ...))))
 
 (define-syntax-parser data
+  [(_ (name:id v*:id ...) c*:constructor ...)
+   (define (C-name id) (format-id id #:source id "~a:~a" #'name id))
+   (with-syntax ([(c-name* ...) (stx-map C-name #'(c*.name ...))])
+     #'(begin
+         (struct (v* ...) name () #:transparent)
+         (struct (v* ...) c-name* name c*.bind* #:transparent) ...))]
   [(_ name:id c*:constructor ...)
-   (with-syntax ([(c-name* ...) (stx-map (lambda (id) (format-id id #:source id "~a:~a" #'name id)) #'(c*.name ...))])
+   (define (C-name id) (format-id id #:source id "~a:~a" #'name id))
+   (with-syntax ([(c-name* ...) (stx-map C-name #'(c*.name ...))])
      #'(begin
          (struct name () #:transparent)
          (struct c-name* name c*.bind* #:transparent) ...))])
@@ -39,4 +46,17 @@
       [(E:Int v) v]
       [(E:Add l r) (+ (Eval l) (Eval r))]))
 
-  (check-equal? (Eval (E:Add (E:Int 1) (E:Int 2))) 3))
+  (check-equal? (Eval (E:Add (E:Int 1) (E:Int 2))) 3)
+
+  (data (LIST T)
+        [Nil]
+        [Cons T (LIST T)])
+
+  (: Len : (∀ (T) (LIST T) -> Natural))
+  (define (Len L)
+    (match L
+      [(LIST:Nil) 0]
+      [(LIST:Cons t Tail) (add1 (Len Tail))]))
+
+  (check-equal? (Len (LIST:Cons 1 (LIST:Nil)))
+                1))
