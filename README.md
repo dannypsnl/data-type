@@ -1,7 +1,8 @@
 # data-type
 
-[![Test](https://github.com/dannypsnl/data-type/actions/workflows/test.yml/badge.svg)](https://github.com/dannypsnl/data-type/actions/workflows/test.yml)
-[![Coverage Status](https://coveralls.io/repos/github/dannypsnl/data-type/badge.svg?branch=develop)](https://coveralls.io/github/dannypsnl/data-type?branch=develop)
+
+[![Test](https://github.com/dannypsnl/data-type/actions/workflows/racket-test.yml/badge.svg)](https://github.com/dannypsnl/data-type/actions/workflows/racket-test.yml)
+[![Coverage Status](https://badgen.net/https/dannypsnl.github.io/data-type/coverage/badge.json)](https://dannypsnl.github.io/data-type/coverage)
 [![Documentation](https://img.shields.io/badge/docs-published-blue)](https://docs.racket-lang.org/data-type)
 
 ### Usage
