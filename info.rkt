@@ -3,6 +3,7 @@
 (define deps '("base" "typed-racket-lib"))
 (define build-deps '("scribble-lib"
                      "racket-doc"
+                     "cover"
                      "rackunit-lib"
                      "rackunit-typed"))
 (define scribblings '(("scribblings/data-type.scrbl" ())))
