@@ -28,6 +28,7 @@ jobs:
           distribution: full
           variant: "CS"
           version: "stable"
+          packages: "cover, cover-badge"
       - run: raco pkg install --no-docs --auto --skip-installed
       - run: |
           raco cover -b .
