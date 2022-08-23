@@ -25,28 +25,29 @@
       id))
 
 (define-syntax-parser data
-  [(_ (name:id v*:id ...) (~optional (~seq #:prefix
-                                           (~optional prefix #:defaults ([prefix #'name]))))
+  [(_ (~or name:id
+           (name:id v*:id ...))
+      (~or (~seq #:prefix (~optional prefix:id #:defaults ([prefix #'name])))
+           (~seq))
       c*:constructor ...)
    (with-syntax ([(c-name* ...) (stx-map (C-name (attribute prefix)) #'(c*.name ...))])
-     #'(begin
-         (struct (v* ...) name () #:transparent)
-         (struct (v* ...) c-name* name c*.bind* #:transparent) ...))]
-  [(_ name:id (~optional (~seq #:prefix
-                               (~optional prefix #:defaults ([prefix #'name]))))
-      c*:constructor ...)
-   (with-syntax ([(c-name* ...) (stx-map (C-name (attribute prefix)) #'(c*.name ...))])
-     #'(begin
-         (struct name () #:transparent)
-         (struct c-name* name c*.bind* #:transparent) ...))])
+     (if (attribute v*)
+         #'(begin (struct (v* ...) name () #:transparent)
+                  (struct (v* ...) c-name* name c*.bind* #:transparent) ...)
+         #'(begin (struct name () #:transparent)
+                  (struct c-name* name c*.bind* #:transparent) ...)))])
 
 (module+ test
   (require typed/rackunit)
 
-  (data K
-        [Int Integer]
-        [Add K K])
-  (Int 1)
+  (data K [Int Integer])
+  (check-true (K? (Int 1)))
+
+  (data (Foo T) [V T])
+  (check-true (Foo? (V 1)))
+
+  (data Bar #:prefix [V Integer])
+  (check-true (Bar? (Bar:V 1)))
 
   (data Expr #:prefix E
         [Int Integer]
