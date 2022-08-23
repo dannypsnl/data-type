@@ -19,16 +19,23 @@
     (pattern (name:id b*:binding ...)
       #:attr bind* #'(b*.pair ...))))
 
+(define-for-syntax ((C-name prefix) id)
+  (if prefix
+      (format-id id #:source id "~a:~a" prefix id)
+      id))
+
 (define-syntax-parser data
-  [(_ (name:id v*:id ...) c*:constructor ...)
-   (define (C-name id) (format-id id #:source id "~a:~a" #'name id))
-   (with-syntax ([(c-name* ...) (stx-map C-name #'(c*.name ...))])
+  [(_ (name:id v*:id ...) (~optional (~seq #:prefix
+                                           (~optional prefix #:defaults ([prefix #'name]))))
+      c*:constructor ...)
+   (with-syntax ([(c-name* ...) (stx-map (C-name (attribute prefix)) #'(c*.name ...))])
      #'(begin
          (struct (v* ...) name () #:transparent)
          (struct (v* ...) c-name* name c*.bind* #:transparent) ...))]
-  [(_ name:id c*:constructor ...)
-   (define (C-name id) (format-id id #:source id "~a:~a" #'name id))
-   (with-syntax ([(c-name* ...) (stx-map C-name #'(c*.name ...))])
+  [(_ name:id (~optional (~seq #:prefix
+                               (~optional prefix #:defaults ([prefix #'name]))))
+      c*:constructor ...)
+   (with-syntax ([(c-name* ...) (stx-map (C-name (attribute prefix)) #'(c*.name ...))])
      #'(begin
          (struct name () #:transparent)
          (struct c-name* name c*.bind* #:transparent) ...))])
@@ -36,11 +43,16 @@
 (module+ test
   (require typed/rackunit)
 
-  (data E
+  (data K
         [Int Integer]
-        [Add E E])
+        [Add K K])
+  (Int 1)
 
-  (: Eval : E -> Integer)
+  (data Expr #:prefix E
+        [Int Integer]
+        [Add Expr Expr])
+
+  (: Eval : Expr -> Integer)
   (define (Eval e)
     (match e
       [(E:Int v) v]
@@ -48,15 +60,15 @@
 
   (check-equal? (Eval (E:Add (E:Int 1) (E:Int 2))) 3)
 
-  (data (LIST T)
+  (data (LIST T) #:prefix L
         [Nil]
         [Cons T (LIST T)])
 
   (: Len : (∀ (T) (LIST T) -> Natural))
   (define (Len L)
     (match L
-      [(LIST:Nil) 0]
-      [(LIST:Cons t Tail) (add1 (Len Tail))]))
+      [(L:Nil) 0]
+      [(L:Cons t Tail) (add1 (Len Tail))]))
 
-  (check-equal? (Len (LIST:Cons 1 (LIST:Nil)))
+  (check-equal? (Len (L:Cons 1 (L:Nil)))
                 1))
