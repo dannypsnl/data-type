@@ -21,7 +21,7 @@
 
 (define-for-syntax ((C-name prefix) id)
   (if prefix
-      (format-id id #:source id "~a:~a" prefix id)
+      (format-id id #:source id #:props id "~a:~a" prefix id)
       id))
 
 (define-syntax-parser data
